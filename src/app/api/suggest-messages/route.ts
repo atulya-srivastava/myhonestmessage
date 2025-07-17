@@ -11,6 +11,9 @@ export async function POST(request: Request) {
     const { text } = await generateText({
      model: google('models/gemini-2.5-flash'), // Or your specific Gemini model
     prompt: prompt,
+     temperature: 0.8, //randomness of response
+    topP: 0.9,
+    topK: 40
     });
     if (!text) {
       return Response.json(
