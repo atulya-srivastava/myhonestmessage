@@ -9,8 +9,8 @@ const UsernameQuerySchema = z.object({
 
 export async function GET(request: Request) {
   //todo: use this in all other routes
- 
-//  this code is not requuired in the latest Next.js version
+
+  //  this code is not requuired in the latest Next.js version
 
   // if (request.method !== "GET") {
   //   return Response.json(
