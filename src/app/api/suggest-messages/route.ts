@@ -11,8 +11,8 @@ export async function POST(request: Request) {
       model: google("models/gemini-2.5-flash"),
       prompt: prompt,
       temperature: 0.8, //randomness of response
-      topP: 0.9,
-      topK: 40,
+      topP: 0.9, //determines the diversity by sampling from the most probable tokens
+      topK: 40, //limits the selection of the next word to the k most probable tokens at each step
     });
     if (!text) {
       return Response.json(
