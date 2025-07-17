@@ -8,11 +8,11 @@ export async function POST(request: Request) {
 
   try {
     const { text } = await generateText({
-     model: google('models/gemini-2.5-flash'),
-    prompt: prompt,
-     temperature: 0.8, //randomness of response
-    topP: 0.9,
-    topK: 40
+      model: google("models/gemini-2.5-flash"),
+      prompt: prompt,
+      temperature: 0.8, //randomness of response
+      topP: 0.9,
+      topK: 40,
     });
     if (!text) {
       return Response.json(
