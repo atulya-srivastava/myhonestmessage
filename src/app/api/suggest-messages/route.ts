@@ -1,16 +1,29 @@
-import { openai } from '@ai-sdk/openai';
-import { streamText } from 'ai';
+import { generateText } from "ai";
+import { google } from "@ai-sdk/google";
+import dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
 
-// Allow streaming responses up to 30 seconds
-export const maxDuration = 30;
+export async function POST(request: Request) {
+  const text = "";
+  const prompt = `create a list of three open-ended and engaging questions formatted as a single string. Each question should be separated by '||'. These questions are for an anonymous social messaging platform, like Qooh.me,and should be suitable for a diverse audience. Ensure all the three messages written are unique and have been sent only after a good thought process from your side dont include any apostrophe & personal information or sensitive topics. The questions should be thought-provoking and encourage meaningful responses.`;
 
-export async function POST(req: Request) {
-  const { messages } = await req.json();
-
-  const result = streamText({
-    model: openai('gpt-4o'),
-    messages,
-  });
-
-  return result.toDataStreamResponse();
+  try {
+    const { text } = await generateText({
+     model: google('models/gemini-2.5-flash'), // Or your specific Gemini model
+    prompt: prompt,
+    });
+    if (!text) {
+      return Response.json(
+        { success: false, message: "No text generated" },
+        { status: 400 }
+      );
+    }
+    return Response.json({ success: true, text }, { status: 200 });
+  } catch (error) {
+    console.error("An unexpected error occurred", error);
+    return Response.json(
+      { success: false, message: "Failed to generate text" },
+      { status: 500 }
+    );
+  }
 }
