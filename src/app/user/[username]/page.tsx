@@ -24,10 +24,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, Sparkles } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
+import axios, { AxiosError } from "axios";
+import { ApiResponse } from "@/types/ApiResponse";
+import suggestedMessages from '@/suggestedMessages.json'
 
 const FormSchema = z.object({
   message: z.string().min(10, {
@@ -40,7 +43,31 @@ const messagepage = () => {
   const username = params.username as string;
   const [isLoading, setIsLoading] = useState(false);
   const [isSuggestingMessages, setIsSuggestingMessages] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
+
+  useEffect(()=>{
+      setSuggestedQuestions(suggestedMessages as string[]);
+
+      // Function to check screen size
+    const checkScreenSize = () => {
+      // You can define 'md' breakpoint here (e.g., 768px for Tailwind's md)
+      setIsSmallScreen(window.innerWidth < 768);
+    };
+
+    // Initial check
+    checkScreenSize();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', checkScreenSize);
+
+    // Clean up event listener on component unmount
+    return () => window.removeEventListener('resize', checkScreenSize);
+  },[])
+
+    const questionsToDisplay = isSmallScreen
+    ? suggestedQuestions.slice(0, 2) // Show only the first 2 on small screens
+    : suggestedQuestions; 
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -51,37 +78,37 @@ const messagepage = () => {
 
   const { reset } = form;
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
     setIsLoading(true);
     try {
-      const response = fetch(`/api/send-message/${username}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: data.message }),
+     await axios.post(`/api/send-message`, {
+        username,
+        content: data.message,
       });
-
+      toast.success(`Message Sent successfully to @${username}`);
+      reset();
+      
     } catch (error) {
+      const axiosError = error as AxiosError<ApiResponse>;
+      toast.error(axiosError.response?.data.message);
+      console.log("Error sending message:", axiosError);
+      // console.log(response)
+
     } finally {
       setIsLoading(false);
-      toast.success(`Sent successfully to @${username}`);
-      reset();
     }
   }
   const fetchSuggestedMessages = async () => {
     setIsSuggestingMessages(true);
     try {
-      const response = await fetch("/api/suggest-messages", {
-        method: "POST",
-      });
+      const response = await axios.post("/api/suggest-messages");
 
       console.log("this is the response = ", response);
-      if (!response.ok) {
-        throw new Error("Failed to fetch suggested messages");
+      if (!response.data.success) {
+        throw new Error(response.data.message);
       }
 
-      const data = await response.json();
+      const data = response.data;
       console.log("this is the data", data);
       if (data.success) {
         console.log(data.text);
@@ -102,65 +129,68 @@ const messagepage = () => {
           Public Profile Page
         </h1>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className=" space-y-6">
-            <FormField
-              control={form.control}
-              name="message"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Send message to @{username}</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Your anonymous words here...."
-                      className="resize-none"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex justify-center">
-              {isLoading ? (
-                <Button disabled>
-                  <Loader2 className="animate-spin" /> Please wait
-                </Button>
-              ) : (
-                <Button type="submit">Send</Button>
-              )}
-            </div>
-          </form>
-        </Form>
-
-        <div className="flex">
-          {isSuggestingMessages ? (
-            <Button disabled>
-              <Loader2 className="animate-spin" /> Suggesting...
-            </Button>
-          ) : (
-            <Button onClick={fetchSuggestedMessages}><Sparkles/>Suggest Messages</Button>
-          )}
+        <div className="mt-14 md:mt-0">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className=" space-y-6">
+              <FormField
+                control={form.control}
+                name="message"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Send message to @{username}</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Your anonymous words here...."
+                        className="resize-none h-32 md:h-auto"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-center">
+                {isLoading ? (
+                  <Button disabled>
+                    <Loader2 className="animate-spin" /> Please wait
+                  </Button>
+                ) : (
+                  <Button type="submit" className="w-2/6 md:w-1/12">Send</Button>
+                )}
+              </div>
+            </form>
+          </Form>
         </div>
 
-        <div className="mt-6 mx-6">
+        <div className="flex md:flex-col flex-col-reverse justify-center md:justify-start items-center md:items-start mt-4 md:mt-10 lg:mt-12 ">
+          <div className="md:w-1/2 mt-4 md:mb-2">
+            {isSuggestingMessages ? (
+              <Button disabled>
+                <Loader2 className="animate-spin" /> Suggesting...
+              </Button>
+            ) : (
+              <Button onClick={fetchSuggestedMessages}><Sparkles/>Suggest New Messages</Button>
+            )}
+          </div>
+
+        <div className="mt-14 md:mt-6 mx-6">
           <Card>
             <CardContent>
               <div className="w-full flex flex-col gap-4">
-                {suggestedQuestions.length > 0 &&
-                  suggestedQuestions.map((question, index) => (
+                {questionsToDisplay.length > 0 && 
+                  questionsToDisplay.map((question, index) => (
                     <Button
-                      onClick={() => form.setValue("message", question)}
-                      className="bg-transparent text-black hover:bg-gray-100 rounded-md border-1 border-gray-200"
-                      key={index}
-                    >
-                      {question}
+                    onClick={() => form.setValue("message", question)}
+                    className="bg-transparent text-black hover:bg-gray-100 rounded-md border border-gray-200 whitespace-normal break-words text-center w-full min-h-[90px] md:min-h-12"
+                    key={index}
+                    > {question}
                     </Button>
                   ))}
               </div>
             </CardContent>
           </Card>
         </div>
+                  </div>
         <Separator className="my-6" />
         <div className="text-center">
           <div className="mb-4">Get Your Message Board</div>

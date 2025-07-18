@@ -13,6 +13,7 @@ import { useSession } from "next-auth/react";
 import React, { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 
 const dashboard = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -103,7 +104,7 @@ const dashboard = () => {
   const profileUrl = `${baseUrl}/u/${username}`;
 
   if (!session || !session.user) {
-    return <div>Please log in to view your dashboard.</div>;
+    return <div className="m-auto pb-14 font-semibold text-2xl">Please log in to view your dashboard.</div>;
   }
 
   const copyToClipboard = () => {
@@ -120,11 +121,11 @@ const dashboard = () => {
       <div className="mb-4">
         <h2 className="text-lg font-semibold mb-2">Copy Your Unique Link</h2>{" "}
         <div className="flex items-center">
-          <input
+          <Input
             type="text"
             value={profileUrl}
             disabled
-            className="input input-bordered w-full p-2 mr-2"
+            className="input input-bordered w-full p-2 mr-2 text-black"
           />
           <Button onClick={copyToClipboard}>Copy</Button>
         </div>
@@ -161,7 +162,7 @@ const dashboard = () => {
         {messages.length > 0 ? (
           messages.map((message, index) => (
             <MessageCard
-              // key={message._id}
+              key={message._id as string}
               message={message}
               onMessageDelete={handleDeleteMessage}
             />
