@@ -12,7 +12,6 @@ import { ApiResponse } from "@/types/ApiResponse";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -23,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 
-const page = () => {
+const SignUpPage = () => {
   const [username, setUsername] = useState("");
   const [usernameMessage, setUsernameMessage] = useState("");
   const [ischeckingUsername, setIsCheckingUsername] = useState(false);
@@ -78,14 +77,14 @@ const page = () => {
     } catch (error) {
       console.error("error in sign up of user", error);
       const axiosError = error as AxiosError<ApiResponse>;
-      let errorMessage = axiosError.response?.data.message;
+      const errorMessage = axiosError.response?.data.message;
       toast("signup failed", { description: errorMessage });
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-300">
+    <div className="flex justify-center items-center min-h-screen bg-gray-300 p-4">
       <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
         <div className="text-center">
           <h1 className="text-4xl font-extrabold tracking-tight lg:text-4xl mb-6">
@@ -145,7 +144,7 @@ const page = () => {
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} className="w-full">
               {isSubmitting ? (
                 <>
                   <Loader2 className="animate-spin h-4 w-4 mr-2" />
@@ -164,7 +163,7 @@ const page = () => {
               href={"/sign-in"}
               className="text-blue-600 hover:text-blue-800"
             >
-              Sign in
+              Log in
             </Link>
           </p>
         </div>
@@ -172,4 +171,4 @@ const page = () => {
     </div>
   );
 };
-export default page;
+export default SignUpPage;

@@ -15,10 +15,11 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 
-const dashboard = () => {
+const Dashboard = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSwitchLoading, setIsSwitchLoading] = useState<boolean>(false);
+  const [profileUrl, setProfileUrl] = useState<string>('');
 
   const handleDeleteMessage = (messageId: string) => {
     setMessages(messages.filter((message) => message._id !== messageId));
@@ -78,7 +79,7 @@ const dashboard = () => {
     if (!session || !session.user) return;
     fetchMessages();
     fetchAcceptedMessages();
-  }, [session, setValue, fetchAcceptedMessages]);
+  }, [session, setValue, fetchAcceptedMessages, fetchMessages]);
 
   //handle switch change
   const handleSwitchChange = async () => {
@@ -97,25 +98,25 @@ const dashboard = () => {
       );
     }
   };
-
-  const { username } = session?.user as User || 'atulya';
-  //more research required
-  const baseUrl = `${window.location.protocol}//${window.location.host}`;
-  const profileUrl = `${baseUrl}/u/${username}`;
-
-  if (!session || !session.user) {
-    return <div className="m-auto pb-14 font-semibold text-2xl">Please log in to view your dashboard.</div>;
-  }
-
+  
+   useEffect(() => {
+      const { username } = session?.user as User || '';
+      const baseUrl = `${window.location.protocol}//${window.location.host}`;
+      setProfileUrl(`${baseUrl}/user/${username}`);
+    
+  }, [session]);
+  
   const copyToClipboard = () => {
     navigator.clipboard.writeText(profileUrl); //youre in client component therefore you can access this
     toast.success("URL Copied!", {
       description: "Profile URL has been copied to clipboard.",
     });
   };
+  
+  if (!session || !session.user) return <div className="m-auto pb-14 font-semibold text-2xl">Please log in to view your dashboard.</div>;
 
   return (
-    <div className="my-8 mx-4 md:mx-8 lg:mx-auto p-6 bg-white rounded w-full max-w-6xl">
+    <div className="my-8 mx-auto p-6 bg-white rounded w-full max-w-6xl">
       <h1 className="text-4xl font-bold mb-4">User Dashboard</h1>
 
       <div className="mb-4">
@@ -127,7 +128,7 @@ const dashboard = () => {
             disabled
             className="input input-bordered w-full p-2 mr-2 text-black"
           />
-          <Button onClick={copyToClipboard}>Copy</Button>
+          <Button onClick={copyToClipboard} disabled={!profileUrl}>Copy</Button>
         </div>
       </div>
 
@@ -160,7 +161,7 @@ const dashboard = () => {
       </Button>
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
         {messages.length > 0 ? (
-          messages.map((message, index) => (
+          messages.map((message) => (
             <MessageCard
               key={message._id as string}
               message={message}
@@ -175,4 +176,4 @@ const dashboard = () => {
   );
 };
 
-export default dashboard;
+export default Dashboard;

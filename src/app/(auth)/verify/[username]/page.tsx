@@ -3,7 +3,6 @@
 import { Button } from '@/components/ui/button'
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { signUPSchema } from '@/schemas/signUpSchema'
 import { verifySchema } from '@/schemas/verifySchemas'
 import { zodResolver } from '@hookform/resolvers/zod'
 import axios from 'axios'
@@ -13,7 +12,8 @@ import { useForm } from 'react-hook-form'
 
 import { toast } from 'sonner'
 import * as z  from "zod"
-const verifyAccount = () => {
+
+const VerifyAccount = () => {
     const router = useRouter()
     const param = useParams<{username:string}>()
 
@@ -37,7 +37,7 @@ const verifyAccount = () => {
 
         router.replace('/sign-in')
     } catch (error) {
-        
+      toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
     }
   }
 
@@ -71,4 +71,4 @@ const verifyAccount = () => {
   );
 }
 
-export default verifyAccount
+export default VerifyAccount

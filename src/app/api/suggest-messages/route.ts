@@ -3,7 +3,7 @@ import { google } from "@ai-sdk/google";
 import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
-export async function POST(request: Request) {
+export async function POST() {
   const prompt = `create a list of three open-ended and engaging questions formatted as a single string. Each question should be separated by '||'. These questions are for an anonymous social messaging platform, like Qooh.me,and should be suitable for a diverse audience. Ensure all the three messages written are unique and have been sent only after a good thought process from your side dont include any apostrophe & personal information or sensitive topics. The questions should be thought-provoking and encourage meaningful responses.`;
 
   try {

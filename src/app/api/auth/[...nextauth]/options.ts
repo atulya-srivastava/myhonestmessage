@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/models/UserModel";
+import { User as NextAuthUser } from "next-auth";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -10,23 +11,23 @@ export const authOptions: NextAuthOptions = {
       id: "credentials",
       name: "Credentials",
       credentials: {
+        identifier: { label: "Email or Username", type: "text" },
         email: { label: "Email", type: "text" },
         password: {
           label: "Password",
           type: "password",
         },
       },
-      async authorize(credentials: any): Promise<any> { //look carefully for authorize: key we are using async authorize directly there is no ******function******* keyword over here
+      async authorize(
+        credentials: Record<"email" | "password" | "identifier", string> | undefined,
+      ): Promise<NextAuthUser | null> {
+        if (!credentials) return null;
         await dbConnect();
         try {
           const user = await UserModel.findOne({
             $or: [
-              {
-                email: credentials.identifier,
-              },
-              {
-                username: credentials.identifier,
-              },
+              { email: credentials.identifier },
+              { username: credentials.identifier },
             ],
           });
           if (!user) {
@@ -40,12 +41,18 @@ export const authOptions: NextAuthOptions = {
             user.password
           );
           if (isPasswordCorrect) {
-            return user;
+            // Convert _id to string for NextAuth compatibility
+            const userObj = user.toObject ? user.toObject() : { ...user };
+            userObj._id = user._id?.toString();
+            return userObj as NextAuthUser;
           } else {
             throw new Error("Incorrect Password");
           }
-        } catch (err: any) {
-          throw new err();
+        } catch (err) {
+          if (err instanceof Error) {
+            throw err;
+          }
+          throw new Error("Authorization failed");
         }
       },
     }),

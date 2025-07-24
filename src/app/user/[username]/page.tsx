@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -16,12 +15,7 @@ import {
 } from "@/components/ui/form";
 import {
   Card,
-  CardAction,
   CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useEffect, useState } from "react";
@@ -38,7 +32,7 @@ const FormSchema = z.object({
   }),
 });
 
-const messagepage = () => {
+const MessagePage = () => {
   const params = useParams();
   const username = params.username as string;
   const [isLoading, setIsLoading] = useState(false);
@@ -116,7 +110,7 @@ const messagepage = () => {
         setSuggestedQuestions(questions);
       }
     } catch (error) {
-      toast.error("Failed to fetch suggested messages");
+      toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
     } finally {
       setIsSuggestingMessages(false);
     }
@@ -173,7 +167,7 @@ const messagepage = () => {
             )}
           </div>
 
-        <div className="mt-14 md:mt-6 mx-6">
+        <div className="mt-6 md:mt-6 mx-6">
           <Card>
             <CardContent>
               <div className="w-full flex flex-col gap-4">
@@ -203,4 +197,4 @@ const messagepage = () => {
   );
 };
 
-export default messagepage;
+export default MessagePage;
