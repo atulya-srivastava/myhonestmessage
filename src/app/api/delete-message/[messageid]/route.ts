@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/options";
 import { getServerSession } from "next-auth";
 import { User } from "@/models/UserModel";
+import mongoose from "mongoose";
 
 interface Context {
   params: Promise<{
@@ -16,7 +17,7 @@ export async function DELETE(
   { params }: Context
 ) {
   await dbConnect();
-  const messageId = await params;
+  const { messageid } = await params;
   const session = await getServerSession(authOptions);
   const user = session?.user as User | undefined;
   if (!session || !user) {
@@ -29,7 +30,7 @@ export async function DELETE(
   try {
     const updateResult = await UserModel.updateOne(
       { _id: user._id },
-      { $pull: { messages: { _id: messageId } } }
+      { $pull: { messages: { _id: messageid } } }
     );
 
     if (updateResult.modifiedCount === 0) {
