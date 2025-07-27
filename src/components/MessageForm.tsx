@@ -38,7 +38,7 @@ export const MessageForm = () => {
   }, [debouncedUsername]);
 
   const handleJoin = () => {
-   router.replace('/sign-up')
+   router.push('/sign-up')
   };
 
   const handleSend = () => {
