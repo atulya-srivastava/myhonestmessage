@@ -6,4 +6,7 @@ export interface ApiResponse {
   messages?: Array<Message>; //may be a issue 
   isAcceptingMessages?: boolean;
   error?: string;
+  email?: string;
+  username?: string;
+  verifyCode?:string;
 }

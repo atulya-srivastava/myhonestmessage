@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { JSX } from "react";
+import { sendVerificationEmailviaEmailJS } from "@/helpers/sendVerificationEmailviaEmailJS";
 
 function FloatingParticles() {
   const [particles, setParticles] = useState<JSX.Element[]>([]);
@@ -92,16 +93,32 @@ const SignUpPage = () => {
     setIsSubmitting(true);
     try {
       const response = await axios.post<ApiResponse>("/api/sign-up", data);
-      toast("Success", {
-        description: response.data.message,
-      });
-      router.replace(`/verify/${username}`);
-      setIsSubmitting(false);
+ 
+      if (response.data.success) {
+        const emailResponse = await sendVerificationEmailviaEmailJS(
+          response.data.email ?? "",
+          response.data.username ?? "",
+          response.data.verifyCode ?? ""
+        );
+
+        if (emailResponse.success) {
+          toast("Success", {
+            description: "Registration successful! Please check your email for verification code.",
+          });
+          router.replace(`/verify/${username}`);
+        } else {
+          toast("Registration Successful", {
+            description: "Account created but failed to send verification email. You can request a new verification code.",
+          });
+           router.replace(`/verify/${username}`);
+        }}
     } catch (error) {
       console.error("error in sign up of user", error);
       const axiosError = error as AxiosError<ApiResponse>;
       const errorMessage = axiosError.response?.data.message;
       toast("signup failed", { description: errorMessage });
+
+    }finally{
       setIsSubmitting(false);
     }
   };
