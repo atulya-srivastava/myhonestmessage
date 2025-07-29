@@ -56,7 +56,7 @@ export const MessageForm = () => {
             Enter Username
           </h2>
           <p className="text-muted-foreground text-sm">
-            Choose your anonymous identity to get started
+            Just enter someones username to get started.
           </p>
         </div>
 

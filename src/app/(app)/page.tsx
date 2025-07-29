@@ -1,6 +1,7 @@
 'use client';
 import { MessageForm } from '@/components/MessageForm';
 import { MessageCircle, Shield, Zap } from "lucide-react";
+import Link from 'next/link';
 import { JSX, useEffect, useState } from 'react';
 
 function FloatingParticles() {
@@ -177,7 +178,7 @@ export default function Home() {
               Your privacy is our priority. Start messaging without any barriers.
             </p>
             <p className="text-xs text-muted-foreground/60">
-              Made by @atulya.
+              Made by <Link href="https://x.com/atulyasriv">@atulya.</Link>
             </p>
           </div>
         </footer>
