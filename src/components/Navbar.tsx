@@ -25,7 +25,7 @@ const Navbar = () => {
         
         <div className='container mx-auto flex flex-col md:flex-row justify-between items-center relative z-10'>
             <Link href="/" className='text-2xl md:text-2xl font-bold mb-4 md:mb-0 bg-gradient-primary bg-clip-text text-transparent hover:opacity-80 transition-opacity duration-300'>
-                MySecretMessage
+                MyHonestMessage
             </Link>
             
             <div className="flex justify-center items-center gap-4">
