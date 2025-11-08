@@ -64,7 +64,7 @@ export default function Home() {
         <header className="p-6">
           <div className="max-w-6xl mx-auto">
             <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent animate-fade-in">
-              MySecretMessage
+              MyHonestMessage
             </h1>
           </div>
         </header>

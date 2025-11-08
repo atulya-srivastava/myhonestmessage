@@ -175,7 +175,7 @@ const SignUpPage = () => {
           <div className="relative z-10">
             <div className="text-center">
               <h1 className="text-4xl font-extrabold tracking-tight lg:text-4xl mb-6 bg-gradient-primary bg-clip-text text-transparent">
-                Join MySecretMessage
+                Join MyHonestMessage
               </h1>
               <p className="mb-4 text-white/80">
                 Sign up to start your anonymous adventure

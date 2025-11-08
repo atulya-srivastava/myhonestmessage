@@ -127,7 +127,7 @@ const SignInPage = () => {
           <div className="relative z-10">
             <div className="text-center">
               <h1 className="text-3xl font-extrabold tracking-tight lg:text-4xl mb-4 bg-gradient-primary bg-clip-text text-transparent">
-                MySecretMessage
+                MyHonestMessage
               </h1>
               <p className="mb-4 text-white/80">
                 Log in to start your anonymous adventure

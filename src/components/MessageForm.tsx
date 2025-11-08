@@ -102,7 +102,7 @@ export const MessageForm = () => {
               className="border-primary/30 text-primary bg-primary/10 transition-all duration-300 hover:scale-101 hover:text-white"
             >
               <UserPlus className="w-4 h-4" />
-              Join MySecretMessage
+              Join MyHonestMessage
             </Button>
           </div>
         </div>
