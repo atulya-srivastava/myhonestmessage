@@ -4,6 +4,7 @@ import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/models/UserModel";
 import { User } from "next-auth";
 import mongoose from "mongoose";
+import { decrypt } from "@/helpers/encryption";
 
 export async function GET() {
   await dbConnect();
@@ -43,7 +44,7 @@ export async function GET() {
     console.log("the user looks like this", user); //TODO: remove this line in production
 
     return Response.json(
-      { success: true, messages: user[0].messages },
+      { success: true, messages: user[0].messages.map((msg: any) => ({...msg, content: decrypt(msg.content)})) },
       { status: 200 }
     );
   } catch (error) {

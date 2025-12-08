@@ -1,6 +1,7 @@
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/models/UserModel";
 import { Message } from "@/models/UserModel";
+import { encrypt } from "@/helpers/encryption";
 
 export async function POST(request: Request) {
   await dbConnect();
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
     }
 
     const newMessage = {
-      content,
+      content: encrypt(content),
       createdAt: new Date(),
     };
 
