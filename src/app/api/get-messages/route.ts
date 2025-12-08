@@ -44,7 +44,7 @@ export async function GET() {
     console.log("the user looks like this", user); //TODO: remove this line in production
 
     return Response.json(
-      { success: true, messages: user[0].messages.map((msg: any) => ({...msg, content: decrypt(msg.content)})) },
+      { success: true, messages: user[0].messages.map((msg: { content: string }) => ({...msg, content: decrypt(msg.content)})) },
       { status: 200 }
     );
   } catch (error) {
