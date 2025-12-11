@@ -30,7 +30,7 @@ export async function GET(request: Request) {
 
     const parsed = UsernameQuerySchema.safeParse(queryParam);
 
-    console.log("Parsed value from the zod", parsed); //TODO: remove this line in production
+    // console.log("Parsed value from the zod", parsed); 
 
     if (!parsed.success) {
       const usernameErrors = parsed.error.format().username?._errors || [];
@@ -53,7 +53,7 @@ export async function GET(request: Request) {
       isVerified: true,
     });
 
-    console.log("Existing verified user", existingVerifiedUser); //TODO: remove this line in production
+    // console.log("Existing verified user", existingVerifiedUser);
     if (existingVerifiedUser?.username) {
       return Response.json(
         {

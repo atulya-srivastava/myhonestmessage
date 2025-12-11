@@ -36,6 +36,27 @@ const MessagePage = () => {
   const [isSuggestingMessages, setIsSuggestingMessages] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
+  const [doesExist, setDoesExist] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkUserExists = async () => {
+      try {
+        const response = await axios.get(
+          `/api/check-username-unique?username=${username}`
+        );
+        // If success is true, username is AVAILABLE (doesn't exist)
+        // If success is false, username is TAKEN (exists)
+        setDoesExist(!response.data.success);
+      } catch (error) {
+        console.error("Error checking username:", error);
+        setDoesExist(false);
+      }
+    };
+
+    if (username) {
+      checkUserExists();
+    }
+  }, [username]);
 
   useEffect(() => {
     setSuggestedQuestions(suggestedMessages as string[]);
@@ -114,109 +135,137 @@ const MessagePage = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-background">
-      {/* Content */}
-      <div className="relative z-10">
-        <div className="container max-w-4xl w-full mx-auto my-8 p-6">
-          <h1 className="text-center text-4xl font-bold mb-8">
-            Public Profile Page
-          </h1>
+        <div className="bg-background min-h-screen relative container max-w-4xl w-full mx-auto p-6">
+          {doesExist === null ? (
+            <div className="flex justify-center items-center absolute top-1/2 w-full">
+              <Loader2 className="animate-spin h-8 w-8" />
+            </div>
+          ) : doesExist ? (
+            <>
+              <h1 className="text-center text-4xl font-bold mb-8">
+                Public Profile Page
+              </h1>
 
-          <div className="mt-8">
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6"
-              >
-                <FormField
-                  control={form.control}
-                  name="message"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-lg">Send message to @{username}</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Your anonymous words here...."
-                          className="resize-none h-32 text-base p-4"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex justify-center">
-                  {isLoading ? (
-                    <Button disabled className="w-full md:w-auto">
-                      <Loader2 className="animate-spin mr-2" /> Please wait
+              <div className="mt-8">
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-6"
+                  >
+                    <FormField
+                      control={form.control}
+                      name="message"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-lg">
+                            Send message to @{username}
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Your anonymous words here...."
+                              className="resize-none h-32 text-base p-4"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex justify-center">
+                      {isLoading ? (
+                        <Button disabled className="w-full md:w-auto">
+                          <Loader2 className="animate-spin mr-2" /> Please wait
+                        </Button>
+                      ) : (
+                        <Button
+                          type="submit"
+                          className="w-full md:w-auto font-medium"
+                        >
+                          <Send className="mr-2 h-4 w-4" />
+                          Send Message
+                        </Button>
+                      )}
+                    </div>
+                  </form>
+                </Form>
+              </div>
+
+              <div className="mt-12 space-y-6">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                  <h3 className="text-xl font-semibold">Suggested Messages</h3>
+                  {isSuggestingMessages ? (
+                    <Button disabled variant="outline" size="sm">
+                      <Loader2 className="animate-spin mr-2 h-4 w-4" />{" "}
+                      Suggesting...
                     </Button>
                   ) : (
                     <Button
-                      type="submit"
-                      className="w-full md:w-auto font-medium"
+                      onClick={fetchSuggestedMessages}
+                      variant="outline"
+                      size="sm"
                     >
-                      <Send className="mr-2 h-4 w-4"/>
-                      Send Message
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Suggest New Messages
                     </Button>
                   )}
                 </div>
-              </form>
-            </Form>
-          </div>
 
-          <div className="mt-12 space-y-6">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <h3 className="text-xl font-semibold">Suggested Messages</h3>
-                {isSuggestingMessages ? (
-                <Button disabled variant="outline" size="sm">
-                  <Loader2 className="animate-spin mr-2 h-4 w-4" /> Suggesting...
-                </Button>
-              ) : (
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex flex-col gap-3">
+                      {questionsToDisplay.length > 0 ? (
+                        questionsToDisplay.map((question, index) => (
+                          <button
+                            onClick={() => form.setValue("message", question)}
+                            className="text-left p-4 rounded-lg border hover:bg-muted transition-colors text-foreground/90 text-sm md:text-base"
+                            key={index}
+                          >
+                            {question}
+                          </button>
+                        ))
+                      ) : (
+                        <p className="text-center text-muted-foreground">
+                          No suggestions available.
+                        </p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Separator className="my-8" />
+
+              <div className="text-center space-y-4">
+                <div className="text-lg font-medium">
+                  Get Your Own Message Board
+                </div>
+                <Link href={"/sign-up"}>
+                  <Button variant="default" className="font-medium">
+                    Create Your Account
+                  </Button>
+                </Link>
+              </div>
+            </>
+          ) : (
+            // user doesnot exist ui-->
+            <div className="flex flex-col items-center justify-center gap-4 absolute w-full top-2/5">
+              <h1 className="text-center text-4xl font-bold">
+                Username Not Registered
+              </h1>
+              <p className="text-center text-lg text-muted-foreground">
+                @{username} is not registered to receive messages
+              </p>
+              <Link href={"/sign-up"}>
                 <Button
-                  onClick={fetchSuggestedMessages}
-                  variant="outline"
-                  size="sm"
+                  variant="default"
+                  className="font-medium text-base px-6 py-2"
                 >
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Suggest New Messages
+                  Grab it Now - Create Account
                 </Button>
-              )}
+              </Link>
             </div>
-
-            <Card>
-              <CardContent className="p-6">
-                 <div className="flex flex-col gap-3">
-                    {questionsToDisplay.length > 0 ? (
-                      questionsToDisplay.map((question, index) => (
-                        <button
-                          onClick={() => form.setValue("message", question)}
-                          className="text-left p-4 rounded-lg border hover:bg-muted transition-colors text-foreground/90 text-sm md:text-base"
-                          key={index}
-                        >
-                          {question}
-                        </button>
-                      ))
-                    ) : (
-                      <p className="text-center text-muted-foreground">No suggestions available.</p>
-                    )}
-                 </div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <Separator className="my-8" />
-          
-          <div className="text-center space-y-4">
-            <div className="text-lg font-medium">Get Your Own Message Board</div>
-            <Link href={"/sign-up"}>
-              <Button variant="default" className="font-medium">
-                Create Your Account
-              </Button>
-            </Link>
-          </div>
+          )}
         </div>
-      </div>
-    </div>
   );
 };
 export default MessagePage;
