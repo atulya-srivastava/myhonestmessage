@@ -2,7 +2,7 @@
 
 import axios, { AxiosError } from 'axios';
 import dayjs from 'dayjs';
-import { X } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { Message } from '@/models/UserModel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -52,8 +52,8 @@ export default function MessageCard({ message, onMessageDelete }: MessageCardPro
           <CardTitle>{message.content}</CardTitle>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant='destructive'>
-                <X className="w-5 h-5" />
+              <Button variant='secondary'>
+                <Trash2 className="w-2 h-2 text-red-500" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
