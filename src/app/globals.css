@@ -41,7 +41,6 @@
   --color-secondary: hsl(var(--secondary));
   --color-primary-foreground: hsl(var(--primary-foreground));
   --color-primary: hsl(var(--primary));
-  --color-primary-glow: hsl(var(--primary-glow));
   
   --color-popover-foreground: hsl(var(--popover-foreground));
   --color-popover: hsl(var(--popover));
@@ -54,24 +53,15 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   
-  /* Background images */
-  --background-gradient-primary: var(--gradient-primary);
-  --background-gradient-secondary: var(--gradient-secondary);
-  
-  /* Box shadows */
-  --box-shadow-glow: var(--shadow-glow);
-  --box-shadow-subtle: var(--shadow-subtle);
-  
   /* Animations */
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
-  --animate-glow-pulse: glow-pulse 2s ease-in-out infinite;
   --animate-fade-in: fade-in 0.6s ease-out;
 }
 
 /* Lovable's color scheme (HSL) - This gives you the purple background */
 :root {
-  --background: 240 10% 3.9%;        /* Dark purple background */
+  --background: 240 10% 4%;        /* Dark background */
   --foreground: 0 0% 98%;
   --card: 240 10% 7%;
   --card-foreground: 0 0% 98%;
@@ -79,7 +69,6 @@
   --popover-foreground: 0 0% 98%;
   --primary: 263 70% 50%;             /* Purple primary */
   --primary-foreground: 0 0% 98%;
-  --primary-glow: 263 70% 65%;
   --secondary: 240 10% 15%;
   --secondary-foreground: 0 0% 98%;
   --muted: 240 10% 15%;
@@ -92,12 +81,7 @@
   --input: 240 10% 15%;
   --ring: 263 70% 50%;
   
-  /* Custom design tokens */
-  --gradient-primary: linear-gradient(135deg, hsl(263 70% 50%), hsl(280 70% 60%));
-  --gradient-secondary: linear-gradient(180deg, hsl(240 10% 7%), hsl(240 10% 10%));
-  --shadow-glow: 0 0 30px hsl(263 70% 50% / 0.3);
-  --shadow-subtle: 0 10px 30px -10px hsl(240 10% 0% / 0.5);
-  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: all 0.2s ease;
   --radius: 0.5rem;
   
   /* Sidebar colors */
@@ -119,7 +103,7 @@
 }
 
 .dark {
-  --background: 222.2 84% 4.9%;       /* Even darker purple for dark mode */
+  --background: 222.2 84% 4.9%;
   --foreground: 210 40% 98%;
   --card: 222.2 84% 4.9%;
   --card-foreground: 210 40% 98%;
@@ -157,15 +141,6 @@
   --chart-5: 15 85% 65%;
 }
 
-/* Alternative color scheme for other components (if needed) */
-.theme-dark-black {
-  --background: 0 0% 5%;              /* Pure black background */
-  --foreground: 0 0% 98%;
-  --card: 0 0% 8%;
-  --card-foreground: 0 0% 98%;
-  /* Add other overrides as needed */
-}
-
 /* Keyframes */
 @keyframes accordion-down {
   from { height: 0; }
@@ -177,49 +152,13 @@
   to { height: 0; }
 }
 
-@keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 20px hsl(263 70% 50% / 0.3); }
-  50% { box-shadow: 0 0 40px hsl(263 70% 50% / 0.6); }
-}
-
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Define the glowing border animation */
-@keyframes border-glow {
-  0% {
-    border-color: rgba(255, 255, 255, 0);
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0);
-  }
-  25% {
-    border-color: rgba(255, 255, 255, 0.7);
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-  }
-  50% {
-    border-color: rgba(255, 255, 255, 0);
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0);
-  }
-  75% {
-    border-color: rgba(255, 255, 255, 0.7);
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-  }
-  100% {
-    border-color: rgba(255, 255, 255, 0);
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0);
-  }
-}
-
-.border-glow {
-  border: 2px solid transparent;
-}
-
-.animate-border-glow {
-  animation: border-glow 2s linear infinite;
-}
-
 @layer base {
+
   * {
     @apply border-border outline-ring/50;
   }
@@ -232,13 +171,7 @@
   /* Utility classes */
   .animate-accordion-down { animation: accordion-down 0.2s ease-out; }
   .animate-accordion-up { animation: accordion-up 0.2s ease-out; }
-  .animate-glow-pulse { animation: glow-pulse 2s ease-in-out infinite; }
   .animate-fade-in { animation: fade-in 0.6s ease-out; }
   
-  .bg-gradient-primary { background-image: var(--gradient-primary); }
-  .bg-gradient-secondary { background-image: var(--gradient-secondary); }
-  
-  .shadow-glow { box-shadow: var(--shadow-glow); }
-  .shadow-subtle { box-shadow: var(--shadow-subtle); }
   .transition-smooth { transition: var(--transition-smooth); }
 }
