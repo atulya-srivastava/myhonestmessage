@@ -3,7 +3,6 @@ import { authOptions } from "../auth/[...nextauth]/options";
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/models/UserModel";
 import { User } from "next-auth";
-import mongoose from "mongoose";
 
 export async function GET() {
   await dbConnect();
@@ -16,36 +15,28 @@ export async function GET() {
       { status: 401 }
     );
   }
- 
+
   const user = session.user as User;
-  const userId = new mongoose.Types.ObjectId(user._id);
 
   try {
-    // First verify user exists
-    const user = await UserModel.findById(userId);
-    
-    if (!user) {
+    const userData = await UserModel.findById(user._id).select('encryptedPrivateKey recoveryWrappedKey');
+
+    if (!userData) {
       return Response.json(
         { success: false, message: "User not found" },
         { status: 404 }
       );
     }
 
-    // Get messages and sort by createdAt descending
-    const messages = user.messages || [];
-    const sortedMessages = [...messages].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-
-    // Return encrypted messages as-is (client will decrypt)
-    return Response.json(
-      { success: true, messages: sortedMessages },
-      { status: 200 }
-    );
+    return Response.json({
+      success: true,
+      encryptedPrivateKey: userData.encryptedPrivateKey,
+      recoveryWrappedKey: userData.recoveryWrappedKey,
+    });
   } catch (error) {
-    console.error("Failed to fetch messages", error);
+    console.error("Failed to fetch encrypted key:", error);
     return Response.json(
-      { success: false, message: "Failed to fetch messages" },
+      { success: false, message: "Failed to fetch encrypted key" },
       { status: 500 }
     );
   }
