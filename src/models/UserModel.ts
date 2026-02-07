@@ -1,7 +1,9 @@
 import mongoose ,{Schema,Document} from "mongoose";
 
 export interface Message extends Document {
-    content: string; //smaller
+    content: string; // Encrypted message content (hex)
+    encryptedAESKey: string; // RSA-encrypted AES key (hex)
+    iv: string; // IV for AES decryption (hex)
     createdAt: Date;
 } //what will a message contain? definitely content and the time when it was posted
 
@@ -9,7 +11,15 @@ export interface Message extends Document {
 //i think this is the mongoose schema for the message
 const MessageSchema: Schema<Message> = new Schema({
     content: {
-        type: String, //capital
+        type: String, // Encrypted message content (hex)
+        required: true,
+    },
+    encryptedAESKey: {
+        type: String, // RSA-encrypted AES key (hex)
+        required: true,
+    },
+    iv: {
+        type: String, // IV for AES decryption (hex)
         required: true,
     },
     createdAt: {
@@ -24,6 +34,9 @@ export interface User extends Document {
     username: string;
     email: string;
     password: string;
+    publicKey: string;           // JWK format, openly accessible
+    encryptedPrivateKey: string; // Wrapped with password
+    recoveryWrappedKey: string;  // Wrapped with recovery code
     createdAt: Date;
     verifyCode: string;
     verifyCodeExpiry: Date;
@@ -50,6 +63,18 @@ const UserSchema: Schema<User> = new Schema({
     password: {
         type: String,
         required: [true, 'Password is required'],
+    },
+    publicKey: {
+        type: String,
+        required: [true, 'Public key is required'],
+    },
+    encryptedPrivateKey: {
+        type: String,
+        required: [true, 'Encrypted private key is required'],
+    },
+    recoveryWrappedKey: {
+        type: String,
+        required: [true, 'Recovery wrapped key is required'],
     },
     createdAt: {
         type: Date,

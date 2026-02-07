@@ -1,15 +1,23 @@
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/models/UserModel";
 import { Message } from "@/models/UserModel";
-import { encrypt } from "@/helpers/encryption";
 
 export async function POST(request: Request) {
   await dbConnect();
 
   try {
     const requestBody = await request.json();
-    console.log("Request body:", requestBody);
-    const { username, content } = requestBody;
+    // Message is already encrypted client-side
+    const { username, encryptedContent, encryptedAESKey, iv } = requestBody;
+
+    // Validate required fields
+    if (!username || !encryptedContent || !encryptedAESKey || !iv) {
+      return Response.json(
+        { success: false, message: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
     const user = await UserModel.findOne({ username });
 
     if (!user) {
@@ -26,12 +34,15 @@ export async function POST(request: Request) {
       );
     }
 
+    // Store the pre-encrypted message (server never sees plaintext)
     const newMessage = {
-      content: encrypt(content),
+      content: encryptedContent,
+      encryptedAESKey: encryptedAESKey,
+      iv: iv,
       createdAt: new Date(),
     };
 
-    user.messages.push(newMessage as Message); // Type assertion to ensure newMessage is treated as a Message type
+    user.messages.push(newMessage as Message);
     await user.save();
 
     return Response.json(
