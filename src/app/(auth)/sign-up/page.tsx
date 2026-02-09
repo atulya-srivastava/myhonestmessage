@@ -19,20 +19,37 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Shield } from "lucide-react";
 import Link from "next/link";
 import { sendVerificationEmailviaEmailJS } from "@/helpers/sendVerificationEmailviaEmailJS";
+import { RecoveryCodeModal } from "@/components/RecoveryCodeModal";
+import {
+  generateKeyPair,
+  exportPublicKey,
+  wrapPrivateKey,
+  generateRecoveryCode,
+} from "@/lib/crypto";
 
 const SignUpPage = () => {
   const [username, setUsername] = useState("");
   const [usernameMessage, setUsernameMessage] = useState("");
   const [ischeckingUsername, setIsCheckingUsername] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGeneratingKeys, setIsGeneratingKeys] = useState(false);
+  
+  // Recovery code modal state
+  const [showRecoveryModal, setShowRecoveryModal] = useState(false);
+  const [recoveryCode, setRecoveryCode] = useState("");
+  const [pendingFormData, setPendingFormData] = useState<z.infer<typeof signUPSchema> | null>(null);
+  const [encryptionKeys, setEncryptionKeys] = useState<{
+    publicKey: string;
+    encryptedPrivateKey: string;
+    recoveryWrappedKey: string;
+  } | null>(null);
 
   const debounced = useDebounceCallback(setUsername, 800);
   const router = useRouter();
 
-  //zod implementation
   const form = useForm<z.infer<typeof signUPSchema>>({
     resolver: zodResolver(signUPSchema),
     defaultValues: {
@@ -51,7 +68,6 @@ const SignUpPage = () => {
           const response = await axios.get(
             `/api/check-username-unique?username=${username}`
           );
-
           setUsernameMessage(response.data.message);
         } catch (error) {
           const axiosError = error as AxiosError<ApiResponse>;
@@ -66,37 +82,118 @@ const SignUpPage = () => {
     checkUsernameUnique();
   }, [username]);
 
+  // Step 1: Generate encryption keys when form is submitted
   const onSubmit = async (data: z.infer<typeof signUPSchema>) => {
-    setIsSubmitting(true);
+    setIsGeneratingKeys(true);
+    
     try {
-      const response = await axios.post<ApiResponse>("/api/sign-up", data);
- 
+      // Generate RSA key pair
+      const keyPair = await generateKeyPair();
+      
+      // Export public key
+      const publicKey = await exportPublicKey(keyPair.publicKey);
+      
+      // Generate recovery code
+      const newRecoveryCode = generateRecoveryCode();
+      
+      // Wrap private key with password
+      const encryptedPrivateKey = await wrapPrivateKey(keyPair.privateKey, data.password);
+      
+      // Wrap private key with recovery code (backup)
+      const recoveryWrappedKey = await wrapPrivateKey(keyPair.privateKey, newRecoveryCode);
+      
+      // Store everything for after modal confirmation
+      setPendingFormData(data);
+      setRecoveryCode(newRecoveryCode);
+      setEncryptionKeys({
+        publicKey,
+        encryptedPrivateKey,
+        recoveryWrappedKey,
+      });
+      
+      // Show recovery code modal
+      setShowRecoveryModal(true);
+      
+    } catch (error) {
+      console.error("Error generating encryption keys:", error);
+      toast.error("Failed to generate encryption keys. Please try again.");
+    } finally {
+      setIsGeneratingKeys(false);
+    }
+  };
+
+  // Step 2: Complete signup after user confirms recovery code
+  const handleRecoveryConfirm = async () => {
+    if (!pendingFormData || !encryptionKeys) return;
+    
+    setShowRecoveryModal(false);
+    setIsSubmitting(true);
+    
+    try {
+      // Send signup request with encryption keys
+      const response = await axios.post<ApiResponse>("/api/sign-up", {
+        ...pendingFormData,
+        publicKey: encryptionKeys.publicKey,
+        encryptedPrivateKey: encryptionKeys.encryptedPrivateKey,
+        recoveryWrappedKey: encryptionKeys.recoveryWrappedKey,
+      });
+
       if (response.data.success) {
+        // Send verification email
         const emailResponse = await sendVerificationEmailviaEmailJS(
           response.data.email ?? "",
           response.data.username ?? "",
           response.data.verifyCode ?? ""
         );
 
+        // Also send recovery code email
+        try {
+          await sendRecoveryCodeEmail(
+            response.data.email ?? "",
+            response.data.username ?? "",
+            recoveryCode
+          );
+        } catch (emailError) {
+          console.error("Failed to send recovery code email:", emailError);
+          // Don't block signup if recovery email fails
+        }
+
         if (emailResponse.success) {
           toast("Success", {
-            description: "Registration successful! Please check your email for verification code.",
+            description: "Registration successful! Please check your email for verification code and recovery code.",
           });
           router.replace(`/verify/${username}`);
         } else {
           toast("Registration Successful", {
             description: "Account created but failed to send verification email. You can request a new verification code.",
           });
-           router.replace(`/verify/${username}`);
-        }}
+          router.replace(`/verify/${username}`);
+        }
+      }
     } catch (error) {
       console.error("error in sign up of user", error);
       const axiosError = error as AxiosError<ApiResponse>;
       const errorMessage = axiosError.response?.data.message;
       toast("signup failed", { description: errorMessage });
-
-    }finally{
+    } finally {
       setIsSubmitting(false);
+      setPendingFormData(null);
+      setEncryptionKeys(null);
+    }
+  };
+
+  // Helper function to send recovery code email
+  const sendRecoveryCodeEmail = async (email: string, username: string, code: string) => {
+    // Using the same EmailJS service for recovery code
+    // You may want to create a separate template for this
+    try {
+      await sendVerificationEmailviaEmailJS(
+        email,
+        username,
+        `Your Recovery Code: ${code} - SAVE THIS SECURELY! This is the only way to recover your encrypted messages if you forget your password.`
+      );
+    } catch (error) {
+      console.error("Failed to send recovery code email:", error);
     }
   };
 
@@ -110,6 +207,10 @@ const SignUpPage = () => {
           <p className="text-muted-foreground">
             Sign up to start your anonymous adventure
           </p>
+          <div className="flex items-center justify-center gap-2 mt-2 text-xs text-muted-foreground">
+            <Shield className="h-3 w-3" />
+            <span>End-to-end encrypted</span>
+          </div>
         </div>
         <Form {...form}>
           <form
@@ -171,19 +272,27 @@ const SignUpPage = () => {
                       {...field}
                     />
                   </FormControl>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Your password encrypts your messages. Choose a strong one!
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isGeneratingKeys}
               className="w-full font-medium"
             >
-              {isSubmitting ? (
+              {isGeneratingKeys ? (
                 <>
                   <Loader2 className="animate-spin h-4 w-4 mr-2" />
-                  Please wait{" "}
+                  Generating encryption keys...
+                </>
+              ) : isSubmitting ? (
+                <>
+                  <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                  Creating account...
                 </>
               ) : (
                 "Continue"
@@ -203,7 +312,15 @@ const SignUpPage = () => {
           </p>
         </div>
       </div>
+
+      {/* Recovery Code Modal */}
+      <RecoveryCodeModal
+        recoveryCode={recoveryCode}
+        isOpen={showRecoveryModal}
+        onConfirm={handleRecoveryConfirm}
+      />
     </div>
   );
 };
+
 export default SignUpPage;

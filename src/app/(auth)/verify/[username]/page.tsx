@@ -20,8 +20,9 @@ const VerifyAccount = () => {
   //zod implementation
   const form = useForm<z.infer<typeof verifySchema>>({
     resolver: zodResolver(verifySchema),
-    
-   
+    defaultValues: {
+      code: "",
+    },
   });
 
   const onSubmit = async (data: z.infer<typeof verifySchema>) =>{
@@ -42,13 +43,13 @@ const VerifyAccount = () => {
   }
 
     return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
+    <div className="flex justify-center items-center min-h-screen bg-background p-4">
+      <div className="w-full max-w-md p-8 space-y-8 bg-card border border-border rounded-xl shadow-sm">
         <div className="text-center">
-          <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
+          <h1 className="text-3xl font-bold tracking-tight mb-4">
             Verify Your Account
           </h1>
-          <p className="mb-4">Enter the verification code sent to your email</p>
+          <p className="text-muted-foreground">Enter the verification code sent to your email</p>
         </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -58,12 +59,12 @@ const VerifyAccount = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Verification Code</FormLabel>
-                  <Input {...field} />
+                  <Input placeholder="Enter code" {...field} />
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit">Verify</Button>
+            <Button type="submit" className="w-full">Verify</Button>
           </form>
         </Form>
       </div>

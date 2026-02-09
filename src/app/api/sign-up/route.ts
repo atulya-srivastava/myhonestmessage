@@ -7,7 +7,19 @@ export async function POST(request: Request) {
   await dbConnect();
 
   try {
-    const { username, email, password } = await request.json();
+    const { username, email, password, publicKey, encryptedPrivateKey, recoveryWrappedKey } = await request.json();
+    
+    // Validate encryption keys are provided
+    if (!publicKey || !encryptedPrivateKey || !recoveryWrappedKey) {
+      return Response.json(
+        {
+          success: false,
+          message: "Encryption keys are required",
+        },
+        { status: 400 }
+      );
+    }
+
     const existingUserVerifiedByUsername = await UserModel.findOne({
       username,
       isVerified: true,
@@ -39,6 +51,9 @@ export async function POST(request: Request) {
       } else {
         const hasedPassword = await bcrypt.hash(password, 10);
         existingUserbyEmail.password = hasedPassword;
+        existingUserbyEmail.publicKey = publicKey;
+        existingUserbyEmail.encryptedPrivateKey = encryptedPrivateKey;
+        existingUserbyEmail.recoveryWrappedKey = recoveryWrappedKey;
         existingUserbyEmail.verifyCode = verifyCode;
         existingUserbyEmail.verifyCodeExpiry = new Date(Date.now() + 3600000);
         await existingUserbyEmail.save();
@@ -52,6 +67,9 @@ export async function POST(request: Request) {
         username,
         email,
         password: hasedPassword,
+        publicKey,
+        encryptedPrivateKey,
+        recoveryWrappedKey,
         verifyCode,
         verifyCodeExpiry: expiryDate,
         isVerified: false,
