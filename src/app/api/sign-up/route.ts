@@ -1,13 +1,14 @@
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/models/UserModel";
 import bcrypt from "bcryptjs";
+import { sendVerificationEmail, sendRecoveryCodeEmail } from "@/helpers/sendEmail";
 
 
 export async function POST(request: Request) {
   await dbConnect();
 
   try {
-    const { username, email, password, publicKey, encryptedPrivateKey, recoveryWrappedKey } = await request.json();
+    const { username, email, password, publicKey, encryptedPrivateKey, recoveryWrappedKey, recoveryCode } = await request.json();
     
     // Validate encryption keys are provided
     if (!publicKey || !encryptedPrivateKey || !recoveryWrappedKey) {
@@ -80,13 +81,27 @@ export async function POST(request: Request) {
       await newUser.save();
     }
 
+    // Send emails server-side
+    try {
+      await sendVerificationEmail(email, username, verifyCode);
+    } catch (emailError) {
+      console.error("Failed to send verification email:", emailError);
+      // Don't block signup if email fails
+    }
+
+    if (recoveryCode) {
+      try {
+        await sendRecoveryCodeEmail(email, username, recoveryCode);
+      } catch (emailError) {
+        console.error("Failed to send recovery code email:", emailError);
+      }
+    }
+
     return Response.json(
       {
         success: true,
-        message: "User saved",
+        message: "User registered successfully. Please check your email for verification code.",
         username,
-        email,
-        verifyCode,
       },
       { status: 201 }
     );
@@ -103,3 +118,4 @@ export async function POST(request: Request) {
     );
   }
 }
+

@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2, Shield } from "lucide-react";
 import Link from "next/link";
-import { sendVerificationEmailviaEmailJS } from "@/helpers/sendVerificationEmailviaEmailJS";
+
 import { RecoveryCodeModal } from "@/components/RecoveryCodeModal";
 import {
   generateKeyPair,
@@ -130,45 +130,21 @@ const SignUpPage = () => {
     setIsSubmitting(true);
     
     try {
-      // Send signup request with encryption keys
+      // Send signup request with encryption keys and recovery code
+      // Emails (verification + recovery) are sent server-side
       const response = await axios.post<ApiResponse>("/api/sign-up", {
         ...pendingFormData,
         publicKey: encryptionKeys.publicKey,
         encryptedPrivateKey: encryptionKeys.encryptedPrivateKey,
         recoveryWrappedKey: encryptionKeys.recoveryWrappedKey,
+        recoveryCode: recoveryCode,
       });
 
       if (response.data.success) {
-        // Send verification email
-        const emailResponse = await sendVerificationEmailviaEmailJS(
-          response.data.email ?? "",
-          response.data.username ?? "",
-          response.data.verifyCode ?? ""
-        );
-
-        // Also send recovery code email
-        try {
-          await sendRecoveryCodeEmail(
-            response.data.email ?? "",
-            response.data.username ?? "",
-            recoveryCode
-          );
-        } catch (emailError) {
-          console.error("Failed to send recovery code email:", emailError);
-          // Don't block signup if recovery email fails
-        }
-
-        if (emailResponse.success) {
-          toast("Success", {
-            description: "Registration successful! Please check your email for verification code and recovery code.",
-          });
-          router.replace(`/verify/${username}`);
-        } else {
-          toast("Registration Successful", {
-            description: "Account created but failed to send verification email. You can request a new verification code.",
-          });
-          router.replace(`/verify/${username}`);
-        }
+        toast("Success", {
+          description: "Registration successful! Please check your email for verification code and recovery code.",
+        });
+        router.replace(`/verify/${username}`);
       }
     } catch (error) {
       console.error("error in sign up of user", error);
@@ -179,21 +155,6 @@ const SignUpPage = () => {
       setIsSubmitting(false);
       setPendingFormData(null);
       setEncryptionKeys(null);
-    }
-  };
-
-  // Helper function to send recovery code email
-  const sendRecoveryCodeEmail = async (email: string, username: string, code: string) => {
-    // Using the same EmailJS service for recovery code
-    // You may want to create a separate template for this
-    try {
-      await sendVerificationEmailviaEmailJS(
-        email,
-        username,
-        `Your Recovery Code: ${code} - SAVE THIS SECURELY! This is the only way to recover your encrypted messages if you forget your password.`
-      );
-    } catch (error) {
-      console.error("Failed to send recovery code email:", error);
     }
   };
 

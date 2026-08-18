@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob:",
               "font-src 'self' https://fonts.gstatic.com",
-              "connect-src 'self' https://generativelanguage.googleapis.com https://api.emailjs.com https://vitals.vercel-insights.com",
+              "connect-src 'self' https://generativelanguage.googleapis.com https://vitals.vercel-insights.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",

@@ -39,7 +39,7 @@ A secure, anonymous messaging platform with **end-to-end encryption**. Share you
 | **Database** | MongoDB with Mongoose ODM |
 | **Authentication** | NextAuth.js |
 | **Encryption** | Web Crypto API (RSA-OAEP, AES-GCM, PBKDF2) |
-| **Email** | Resend + React Email |
+| **Email** | Nodemailer (SMTP / Gmail) |
 | **AI** | Vercel AI SDK + Google Gemini |
 | **Styling** | Tailwind CSS 4 |
 | **UI Components** | Radix UI, Lucide Icons |
@@ -52,7 +52,7 @@ A secure, anonymous messaging platform with **end-to-end encryption**. Share you
 - **Node.js** 18.x or higher
 - **MongoDB** instance (local or MongoDB Atlas)
 - **Google AI API key** (for message suggestions)
-- **Resend API key** (for verification emails)
+- **SMTP Email Credentials** (Gmail App Password for Nodemailer)
 
 ### Installation
 
@@ -78,8 +78,9 @@ A secure, anonymous messaging platform with **end-to-end encryption**. Share you
    NEXTAUTH_SECRET=your-secret-key
    NEXTAUTH_URL=http://localhost:3000
    
-   # Email (Resend)
-   RESEND_API_KEY=re_your_api_key
+   # Email (Nodemailer)
+   EMAIL_USER=your-email@gmail.com
+   EMAIL_PASS=your-gmail-app-password
    
    # AI (Google Gemini)
    GOOGLE_GENERATIVE_AI_API_KEY=your-api-key
@@ -125,10 +126,11 @@ src/
 │   ├── MessageForm.tsx
 │   ├── Navbar.tsx
 │   └── RecoveryCodeModal.tsx
+├── helpers/
+│   └── sendEmail.ts        # Nodemailer email helper
 ├── lib/
 │   ├── crypto.ts           # E2E encryption utilities
 │   ├── dbConnect.ts        # MongoDB connection
-│   ├── resend.ts           # Email client
 │   └── utils.ts
 ├── models/
 │   └── UserModel.ts        # User & Message schemas
