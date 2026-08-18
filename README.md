@@ -6,6 +6,7 @@ A secure, anonymous messaging platform with **end-to-end encryption**. Share you
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript)
 ![MongoDB](https://img.shields.io/badge/MongoDB-8.x-green?style=flat-square&logo=mongodb)
 
+
 ## Features
 
 ### End-to-End Encryption
@@ -164,6 +165,10 @@ src/
          │                       │     private key       │
          │                       │                       │
 ```
+
+## The Architecture Flow
+
+<img width="1024" height="1536" alt="image" src="https://github.com/user-attachments/assets/416d0b75-7ae5-4fa9-bc3b-baad50323089" />
 
 ### Key Security Features
 
