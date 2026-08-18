@@ -233,7 +233,7 @@ export async function encryptMessage(
   );
 
   // Export AES key and encrypt it with recipient's RSA public key
-  const rawAESKey = await crypto.subtle.exportKey('raw', aesKey);
+  const rawAESKey = await crypto.subtle.exportKey('raw', aesKey);     
   const encryptedAESKey = await crypto.subtle.encrypt(
     { name: 'RSA-OAEP' },
     publicKey,
@@ -307,7 +307,7 @@ function hexToBuffer(hex: string): Uint8Array {
 // INDEXEDDB KEY STORAGE
 // ============================================
 
-const DB_NAME = 'fylr-encryption';
+const DB_NAME = 'mhm-encryption';
 const DB_VERSION = 1;
 const STORE_NAME = 'keys';
 
@@ -412,4 +412,3 @@ export async function clearStoredPrivateKey(userId: string): Promise<void> {
     console.error('Failed to clear stored private key:', error);
   }
 }
-
