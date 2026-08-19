@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
-import { UserPlus, MessageCircle, Loader2 } from "lucide-react";
+import { UserPlus, MessageCircle, Loader2, LogIn } from "lucide-react";
 import axios from "axios";
 import { useDebounceValue } from "usehooks-ts";
 import { useRouter } from "next/navigation";
@@ -40,6 +40,10 @@ export const MessageForm = () => {
   const handleJoin = () => {
    router.push('/sign-up')
   };
+
+  const handleLogin = () => {
+    router.push('/sign-in')
+  }
 
   const handleSend = () => {
     router.replace(`/user/${debouncedUsername}`)
@@ -93,15 +97,28 @@ export const MessageForm = () => {
             )}
           </Button>
 
+          <div className="flex flex-row gap-1">
+
+
           <Button
             variant="outline"
             onClick={handleJoin}
-            className="w-full"
+            className="w-1/2"
             size="lg"
-          >
+            >
             <UserPlus className="w-4 h-4 mr-2" />
-            Join MyHonestMessage
+            Join
           </Button>
+          <Button
+            variant="outline"
+            onClick={handleLogin}
+            className="w-1/2"
+            size="lg"
+            >
+            <LogIn className="w-4 h-4 mr-2" />
+             Login
+          </Button>
+          </div>
         </div>
 
         <div className="text-center pt-2">
